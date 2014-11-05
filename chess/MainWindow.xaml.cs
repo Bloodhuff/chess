@@ -74,6 +74,22 @@ namespace chess
                 {
                     SelectedPiece = piece;
                     piece.MoveSet = new MoveSet(piece.Color, piece.PieceType, piece.HasMoved, piece.Position);
+                    foreach (var moves in piece.MoveSet.MovesList)
+                    {
+                        var iPanel = SelectedPiece.Position.Parent as StackPanel;
+                        var iparent = iPanel.Parent as StackPanel;
+                        int myGrid = iPanel.Children.IndexOf(SelectedPiece.Position) + moves.H;
+                        int myStack = iparent.Children.IndexOf(iPanel) + moves.V;
+
+                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1)
+                        {
+                            var i = iparent.Children[myStack] as StackPanel;
+                            var x = i.Children[myGrid] as Grid;  
+
+                        var borderMoves = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.Blue };
+                        x.Children.Add(borderMoves);
+                        }
+                    }
                     var border = new Border {BorderThickness = new Thickness(6), BorderBrush = Brushes.Yellow};
                     SelectedPiece.Position.Children.Add(border);
                 }
@@ -108,19 +124,60 @@ namespace chess
                                         _removePiece.Position.Children.Clear();
                                         _removePiece = null;
                                     }
-                                    SelectedPiece.Position.Children.Clear();
-                                    SelectedPiece.HasMoved = true;
-                                    SelectedPiece.Position = MyGrid;
-                                    SelectedPiece.Position.Children.Add(SelectedPiece.Img);
-                                    _firstClick = true;
-                                    SelectedPiece = null;
+
                                 }     
                             }
+                            foreach (var moves in SelectedPiece.MoveSet.MovesList)
+                            {
+                                var iPanel = SelectedPiece.Position.Parent as StackPanel;
+                                var iparent = iPanel.Parent as StackPanel;
+                                int myGrid = iPanel.Children.IndexOf(SelectedPiece.Position) + moves.H;
+                                int myStack = iparent.Children.IndexOf(iPanel) + moves.V;
+
+                                if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1)
+                                {
+                                    var i = iparent.Children[myStack] as StackPanel;
+                                    var x = i.Children[myGrid] as Grid;
+                                    if (x.Children.Count != 0)
+                                    {
+                                        x.Children.RemoveAt(x.Children.Count == 1 ? 0 : 1);
+                                    }
+
+                                }
+                            }
+                            SelectedPiece.Position.Children.Clear();
+                            SelectedPiece.HasMoved = true;
+                            SelectedPiece.Position = MyGrid;
+                            SelectedPiece.Position.Children.Add(SelectedPiece.Img);
+                            _firstClick = true;
+                            SelectedPiece = null;
                         }
                     }
                 }
                 else
                 {
+                    foreach (var moves in SelectedPiece.MoveSet.MovesList)
+                    {
+                        var iPanel = SelectedPiece.Position.Parent as StackPanel;
+                        var iparent = iPanel.Parent as StackPanel;
+                        int myGrid = iPanel.Children.IndexOf(SelectedPiece.Position) + moves.H;
+                        int myStack = iparent.Children.IndexOf(iPanel) + moves.V;
+
+                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1)
+                        {
+                            var i = iparent.Children[myStack] as StackPanel;
+                            var x = i.Children[myGrid] as Grid;
+                            if (x.Children.Count == 1)
+                            {
+                                x.Children.RemoveAt(0);
+                            }
+                            else
+                            {
+                                x.Children.RemoveAt(1); 
+                            }
+
+                        }
+                    }
                     SelectedPiece.Position.Children.Clear();
                     SelectedPiece.Position.Children.Add(SelectedPiece.Img);
                     SelectedPiece = null;
