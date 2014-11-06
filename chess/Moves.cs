@@ -4,6 +4,7 @@
     {
         public int V;
         public int H;
+        public bool Activ = true;
 
         public Moves(int v, int h)
         {

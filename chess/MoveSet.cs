@@ -26,6 +26,9 @@ namespace chess
                 case "Knight":
                     Knight();
                     break;
+                case "Rook":
+                    Rook();
+                    break;
             }
         }
 
@@ -117,22 +120,14 @@ namespace chess
 
         void Knight()
         {
-            var move1 = new Moves(2, 1);
-            var move2 = new Moves(2, -1);
-            var move3 = new Moves(-2, 1);
-            var move4 = new Moves(-2, -1);
-            var move5 = new Moves(1, 2);
-            var move6 = new Moves(1, -2);
-            var move7 = new Moves(-1, 2);
-            var move8 = new Moves(-1, -2);
-            MovesList.Add(move1);
-            MovesList.Add(move2);
-            MovesList.Add(move3);
-            MovesList.Add(move4);
-            MovesList.Add(move5);
-            MovesList.Add(move6);
-            MovesList.Add(move7);
-            MovesList.Add(move8);
+            MovesList.Add(new Moves(2, 1));
+            MovesList.Add(new Moves(2, -1));
+            MovesList.Add(new Moves(-2, 1));
+            MovesList.Add(new Moves(-2, -1));
+            MovesList.Add(new Moves(1, 2));
+            MovesList.Add(new Moves(1, -2));
+            MovesList.Add(new Moves(-1, 2));
+            MovesList.Add(new Moves(-1, -2));
             var thisPanel = Position.Parent as StackPanel;
             foreach (var piece in Main.PieceList)
             {
@@ -142,43 +137,101 @@ namespace chess
                     var piecePanelParent = piecePanel.Parent as StackPanel;
                     if (thisPanel != null)
                     {
-                        var thisPanelParent = thisPanel.Parent as StackPanel;
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) + 1) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + 2== piecePanelParent.Children.IndexOf((piecePanel))))
+                        foreach (var movese in MovesList)
                         {
-                            MovesList.Remove(move1);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) - 1) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + 2 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move2);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) + 1) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) - 2 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move3);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) - 1) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) - 2 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move4);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) + 2) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + 1 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move5);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) - 2) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + 1 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move6);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) + 2) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) - 1 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move7);
-                        }
-                        if (Color == piece.Color && (thisPanel.Children.IndexOf(Position) - 2) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) - 1 == piecePanelParent.Children.IndexOf((piecePanel))))
-                        {
-                            MovesList.Remove(move8);
+                            var thisPanelParent = thisPanel.Parent as StackPanel;
+                            if (thisPanelParent != null && (piecePanelParent != null && (Color == piece.Color && (thisPanel.Children.IndexOf(Position) + movese.H) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + movese.V == piecePanelParent.Children.IndexOf((piecePanel))))))
+                            {
+                                movese.Activ = false;
+                            }
                         }
                     }
                 }
             }
+        }
 
+        void Rook()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                MovesList.Add(new Moves(0, i));
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                MovesList.Add(new Moves(i, 0));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                MovesList.Add(new Moves(i, 0));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                MovesList.Add(new Moves(0, i));
+            }
+            var thisPanel = Position.Parent as StackPanel;
+            foreach (var piece in Main.PieceList)
+            {
+                bool blockedHPositiv = false;
+                bool blockedHNegativ = false;
+                bool blockedVPositiv = false;
+                bool blockedVNegativ = false;
+                var piecePanel = piece.Position.Parent as StackPanel;
+                if (piecePanel != null)
+                {
+                    var piecePanelParent = piecePanel.Parent as StackPanel;
+                    if (thisPanel != null)
+                    {
+                        foreach (var movese in MovesList)
+                        {
+                            var thisPanelParent = thisPanel.Parent as StackPanel;
+                            if (movese.H > 0)
+                            {
+                                if (thisPanelParent != null && (piecePanelParent != null && ((thisPanel.Children.IndexOf(Position) + movese.H) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + movese.V == piecePanelParent.Children.IndexOf((piecePanel))))) || blockedHPositiv)
+                                {
+                                    if (Color == piece.Color || blockedHPositiv)
+                                    {
+                                        movese.Activ = false;     
+                                    }
+                                    blockedHPositiv = true;
+                                }   
+                            }
+                            if (movese.V > 0)
+                            {
+                                if (thisPanelParent != null && (piecePanelParent != null && ((thisPanel.Children.IndexOf(Position) + movese.H) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + movese.V == piecePanelParent.Children.IndexOf((piecePanel))))) || blockedVPositiv)
+                                {
+                                    if (Color == piece.Color || blockedVPositiv)
+                                    {
+                                        movese.Activ = false;
+                                    }
+                                    blockedVPositiv = true;
+                                }
+                            }
+                            if (movese.H < 0)
+                            {
+                                if (thisPanelParent != null && (piecePanelParent != null && ((thisPanel.Children.IndexOf(Position) + movese.H) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + movese.V == piecePanelParent.Children.IndexOf((piecePanel))))) || blockedHNegativ)
+                                {
+                                    if (Color == piece.Color || blockedHNegativ)
+                                    {
+                                        movese.Activ = false;
+                                    }
+                                    blockedHNegativ = true;
+                                }
+                            }
+                            if (movese.V < 0)
+                            {
+                                if (thisPanelParent != null && (piecePanelParent != null && ((thisPanel.Children.IndexOf(Position) + movese.H) == piecePanel.Children.IndexOf(piece.Position) && (thisPanelParent.Children.IndexOf(thisPanel) + movese.V == piecePanelParent.Children.IndexOf((piecePanel))))) || blockedVNegativ)
+                                {
+                                    if (Color == piece.Color || blockedVNegativ)
+                                    {
+                                        movese.Activ = false;
+                                    }
+                                    blockedVNegativ = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

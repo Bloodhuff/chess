@@ -81,7 +81,7 @@ namespace chess
                         int myGrid = iPanel.Children.IndexOf(SelectedPiece.Position) + moves.H;
                         int myStack = iparent.Children.IndexOf(iPanel) + moves.V;
 
-                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1)
+                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1 && moves.Activ)
                         {
                             var i = iparent.Children[myStack] as StackPanel;
                             var x = i.Children[myGrid] as Grid;
@@ -112,7 +112,7 @@ namespace chess
                             var selectedstackPanel = selectedPanel.Parent as StackPanel;
                             foreach (var moves in SelectedPiece.MoveSet.MovesList)
                             {
-                                if (selectedstackPanel != null && (MyGridstackPanel != null && (((SelectedPiece != null && myGridPanel.Children.IndexOf(MyGrid) == (selectedPanel.Children.IndexOf(SelectedPiece.Position) + moves.H))) && MyGridstackPanel.Children.IndexOf(myGridPanel) == (selectedstackPanel.Children.IndexOf(selectedPanel) + moves.V))))
+                                if (selectedstackPanel != null && (MyGridstackPanel != null && (((SelectedPiece != null && myGridPanel.Children.IndexOf(MyGrid) == (selectedPanel.Children.IndexOf(SelectedPiece.Position) + moves.H))) && MyGridstackPanel.Children.IndexOf(myGridPanel) == (selectedstackPanel.Children.IndexOf(selectedPanel) + moves.V))) && moves.Activ)
                                 {
                                     foreach (var piece in PieceList.Where(piece => Equals(piece.Position, MyGrid)))
                                     {
@@ -132,7 +132,7 @@ namespace chess
                                         int myGrid = iPanel.Children.IndexOf(SelectedPiece.Position) + moves1.H;
                                         int myStack = iparent.Children.IndexOf(iPanel) + moves1.V;
 
-                                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1)
+                                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1 && moves1.Activ)
                                         {
                                             var i = iparent.Children[myStack] as StackPanel;
                                             var x = i.Children[myGrid] as Grid;
@@ -162,7 +162,7 @@ namespace chess
                         int myGrid = iPanel.Children.IndexOf(SelectedPiece.Position) + moves.H;
                         int myStack = iparent.Children.IndexOf(iPanel) + moves.V;
 
-                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1)
+                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1 && moves.Activ)
                         {
                             var i = iparent.Children[myStack] as StackPanel;
                             var x = i.Children[myGrid] as Grid;
