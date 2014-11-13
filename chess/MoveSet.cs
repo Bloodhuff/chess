@@ -19,11 +19,18 @@ namespace chess
             _position = position;
             switch (piecetype)
             {
-                case Piece.PIECETYPE.Pawn:
-                    Pawn();
+                case Piece.PIECETYPE.Knight:
+                    Knight();
+                    break;
+                case Piece.PIECETYPE.Bishop:
+                    Bishop();
+                    break;
+                case Piece.PIECETYPE.Queen:
+                    Queen();
                     break;
             }
         }
+
         public MoveSet(Piece.COLOR color, Piece.PIECETYPE piecetype, Grid position, bool hasmoved)
         {
             _color = color;
@@ -33,6 +40,12 @@ namespace chess
             {
                 case Piece.PIECETYPE.Pawn:
                     Pawn();
+                    break;
+                case Piece.PIECETYPE.Rook:
+                    Rook();
+                    break;
+                case Piece.PIECETYPE.King:
+                    King();
                     break;
             }
         }
@@ -117,7 +130,470 @@ namespace chess
                 }
             }
         }
+        void Knight()
+        {
+            _movesList.Add(new Move(2, 1));
+            _movesList.Add(new Move(2, -1));
+            _movesList.Add(new Move(-2, 1));
+            _movesList.Add(new Move(-2, -1));
+            _movesList.Add(new Move(1, 2));
+            _movesList.Add(new Move(1, -2));
+            _movesList.Add(new Move(-1, 2));
+            _movesList.Add(new Move(-1, -2));
+            _positionTuple = _board.GetArrayPosition(_position);
+            foreach (var piece in Game.GetInstance().PieceList)
+            {
+                var tempTuple = _board.GetArrayPosition(piece.GetPosition());
+                foreach (var move in _movesList)
+                {
+                    if (_color == piece.GetColor() && (_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2)
+                    {
+                        move.SetIsActiv(false);
+                    }
+                }
+            }
+        }
 
+        void Rook()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                _movesList.Add(new Move(0, i));
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                _movesList.Add(new Move(i, 0));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(i, 0));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(0, i));
+            }
+            _positionTuple = _board.GetArrayPosition(_position);
+            foreach (var piece in Game.GetInstance().PieceList)
+            {
+                var tempTuple = _board.GetArrayPosition(piece.GetPosition());
+                bool blockedHPositiv = false;
+                bool blockedHNegativ = false;
+                bool blockedVPositiv = false;
+                bool blockedVNegativ = false;
+
+                foreach (var move in _movesList)
+                {
+                    if (move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositiv = true;
+                        }
+                    }
+                    if (move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedHNegativ = true;
+                        }
+                    }
+                    if (move.GetX() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativ = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        void Bishop()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                _movesList.Add(new Move(i, i));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(i, i));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(Math.Abs(i), i));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(i, Math.Abs(i)));
+            }
+            _positionTuple = _board.GetArrayPosition(_position);
+            foreach (var piece in Game.GetInstance().PieceList)
+            {
+                var tempTuple = _board.GetArrayPosition(piece.GetPosition());
+                bool blockedVPositivHPositiv = false;
+                bool blockedVPositivHNegativ = false;
+                bool blockedVNegativHPositiv = false;
+                bool blockedVNegativHNegativ = false;
+                foreach (var move in _movesList)
+                {
+                    if (move.GetX() > 0 && move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositivHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositivHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositivHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() > 0 && move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositivHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositivHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositivHNegativ = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativHNegativ = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        void Queen()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                _movesList.Add(new Move(i, i));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(i, i));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(Math.Abs(i), i));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(i, Math.Abs(i)));
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                _movesList.Add(new Move(0, i));
+            }
+            for (int i = 0; i < 8; i++)
+            {
+                _movesList.Add(new Move(i, 0));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(i, 0));
+            }
+            for (int i = 0; i > -8; i--)
+            {
+                _movesList.Add(new Move(0, i));
+            }
+            _positionTuple = _board.GetArrayPosition(_position);
+            foreach (var piece in Game.GetInstance().PieceList)
+            {
+                var tempTuple = _board.GetArrayPosition(piece.GetPosition());
+                bool blockedHPositiv = false;
+                bool blockedHNegativ = false;
+                bool blockedVPositiv = false;
+                bool blockedVNegativ = false;
+                bool blockedVPositivHPositiv = false;
+                bool blockedVPositivHNegativ = false;
+                bool blockedVNegativHPositiv = false;
+                bool blockedVNegativHNegativ = false;
+
+                foreach (var move in _movesList)
+                {
+                    if (move.GetX() > 0 && move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositivHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositivHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositivHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() > 0 && move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositivHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositivHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositivHNegativ = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativHNegativ = true;
+                        }
+                    }
+                }
+                foreach (var move in _movesList)
+                {
+                    if (move.GetY() > 0 && move.GetX() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() > 0 && move.GetY() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositiv = true;
+                        }
+                    }
+                    if (move.GetY() < 0 && move.GetX() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedHNegativ = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativ = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        void King()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                _movesList.Add(new Move(i, i));
+            }
+            for (int i = 0; i > -2; i--)
+            {
+                _movesList.Add(new Move(i, i));
+            }
+            for (int i = 0; i > -2; i--)
+            {
+                _movesList.Add(new Move(Math.Abs(i), i));
+            }
+            for (int i = 0; i > -2; i--)
+            {
+                _movesList.Add(new Move(i, Math.Abs(i)));
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                _movesList.Add(new Move(0, i));
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                _movesList.Add(new Move(i, 0));
+            }
+            for (int i = 0; i > -2; i--)
+            {
+                _movesList.Add(new Move(i, 0));
+            }
+            for (int i = 0; i > -2; i--)
+            {
+                _movesList.Add(new Move(0, i));
+            }
+            _positionTuple = _board.GetArrayPosition(_position);
+            foreach (var piece in Game.GetInstance().PieceList)
+            {
+                var tempTuple = _board.GetArrayPosition(piece.GetPosition());
+                bool blockedHPositiv = false;
+                bool blockedHNegativ = false;
+                bool blockedVPositiv = false;
+                bool blockedVNegativ = false;
+                bool blockedVPositivHPositiv = false;
+                bool blockedVPositivHNegativ = false;
+                bool blockedVNegativHPositiv = false;
+                bool blockedVNegativHNegativ = false;
+
+                foreach (var move in _movesList)
+                {
+                    if (move.GetX() > 0 && move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositivHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositivHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositivHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() > 0 && move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositivHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositivHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositivHNegativ = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() > 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() < 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativHNegativ = true;
+                        }
+                    }
+                }
+                foreach (var move in _movesList)
+                {
+                    if (move.GetY() > 0 && move.GetX() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedHPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedHPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedHPositiv = true;
+                        }
+                    }
+                    if (move.GetX() > 0 && move.GetY() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVPositiv)
+                        {
+                            if (_color == piece.GetColor() || blockedVPositiv)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVPositiv = true;
+                        }
+                    }
+                    if (move.GetY() < 0 && move.GetX() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedHNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedHNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedHNegativ = true;
+                        }
+                    }
+                    if (move.GetX() < 0 && move.GetY() == 0)
+                    {
+                        if ((_positionTuple.Item1 + move.GetX()) == tempTuple.Item1 && (_positionTuple.Item2 + move.GetY()) == tempTuple.Item2 || blockedVNegativ)
+                        {
+                            if (_color == piece.GetColor() || blockedVNegativ)
+                            {
+                                move.SetIsActiv(false);
+                            }
+                            blockedVNegativ = true;
+                        }
+                    }
+                }
+            }
+        }
         public List<Move> GetMoves()
         {
             return _movesList;

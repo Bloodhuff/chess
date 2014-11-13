@@ -84,8 +84,6 @@ namespace chess
             {
                 if (gridcoordinates.Item1 == (selectedPieceCoordinates.Item1 + move.GetX()) && gridcoordinates.Item2 == (selectedPieceCoordinates.Item2 + move.GetY()) && move.GetIsActiv())
                 {
-
-
                     if (_selectedPiece != null)
                     {
                         _selectedPiece.GetPosition().Children.Clear();
@@ -96,10 +94,13 @@ namespace chess
                             int newX = coordinates.Item1 + move1.GetX();
                             if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move1.GetIsActiv())
                             {
-                                _board.MyGrids[newX, newY].Children.RemoveAt(
-                                    _board.MyGrids[newX, newY].Children.Count == 1
-                                        ? 0
-                                        : 1);
+                                if (_board.MyGrids[newX, newY].Children.Count != 0)
+                                {
+                                    _board.MyGrids[newX, newY].Children.RemoveAt(
+                                        _board.MyGrids[newX, newY].Children.Count == 1
+                                            ? 0
+                                            : 1);
+                                }
                             }
                         }
                         Piece removePiece = null;
@@ -112,7 +113,6 @@ namespace chess
                             PieceList.Remove(removePiece);
                             removePiece.GetPosition().Children.Clear();
                         }
-
                         if (_selectedPiece is Pawn)
                         {
                             var pawn = (Pawn)_selectedPiece;
@@ -128,7 +128,6 @@ namespace chess
                             var pawn = (King)_selectedPiece;
                             pawn.SethasMoved();
                         }
-
                         _selectedPiece.SetPosition(grid);
                         _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
                         _firstClick = true;
@@ -164,24 +163,23 @@ namespace chess
                 _selectedPiece = piece;
                 if (piece is Pawn)
                 {
-                    var pawn = (Pawn) piece;
+                    var pawn = (Pawn)piece;
                     pawn.SetMoveSet();
                 }
-                else if(piece is Rook)
+                else if (piece is Rook)
                 {
                     var pawn = (Rook)piece;
-                    pawn.SetMoveSet();        
+                    pawn.SetMoveSet();
                 }
-                else if(piece is King)
+                else if (piece is King)
                 {
                     var pawn = (King)piece;
-                    pawn.SetMoveSet();                    
+                    pawn.SetMoveSet();
                 }
                 else
                 {
-                    piece.SetMoveSet();                    
+                    piece.SetMoveSet();
                 }
-
                 foreach (var move in piece.GetMoveSet())
                 {
                     var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
