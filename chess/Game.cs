@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -14,7 +11,7 @@ namespace chess
         public static Game Instance = null;
         private readonly Board _board = Board.Instance;
         public readonly List<Piece> PieceList = new List<Piece>();
-        private Piece SelectedPiece;
+        private Piece _selectedPiece;
         private bool _firstClick = true;
 
         private Game()
@@ -24,12 +21,9 @@ namespace chess
 
         public static Game GetInstance()
         {
-            if (Instance == null)
-            {
-                Instance = new Game();
-            }
-            return Instance;
+            return Instance ?? (Instance = new Game());
         }
+
         public void Start()
         {
             for (int i = 0; i < 8; i++)
@@ -71,36 +65,26 @@ namespace chess
             }
             else
             {
-                if (!Equals(grid, SelectedPiece.GetPosition()))
+                if (!Equals(grid, _selectedPiece.GetPosition()))
                 {
                 }
                 else
                 {
-                    foreach (var moves in SelectedPiece.GetMoveSet())
+                    foreach (var move in _selectedPiece.GetMoveSet())
                     {
-                        var iPanel = SelectedPiece.GetPosition().Parent as StackPanel;
-                        var iparent = iPanel.Parent as StackPanel;
-                        int myGrid = iPanel.Children.IndexOf(SelectedPiece.GetPosition()) + moves.GetY();
-                        int myStack = iparent.Children.IndexOf(iPanel) + moves.GetX();
-
-                        if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1 && moves.GetIsActiv())
+                        var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+                        int newY = coordinates.Item2 + move.GetY();
+                        int newX = coordinates.Item1 + move.GetX();
+                        if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
                         {
-                            var i = iparent.Children[myStack] as StackPanel;
-                            var x = i.Children[myGrid] as Grid;
-                            if (x.Children.Count == 1)
-                            {
-                                x.Children.RemoveAt(0);
-                            }
-                            else
-                            {
-                                x.Children.RemoveAt(1);
-                            }
-
+                            _board.MyGrids[newX, newY].Children.RemoveAt(_board.MyGrids[newX, newY].Children.Count == 1
+                                ? 0
+                                : 1);
                         }
                     }
-                    SelectedPiece.GetPosition().Children.Clear();
-                    SelectedPiece.GetPosition().Children.Add(SelectedPiece.GetPieceImage());
-                    SelectedPiece = null;
+                    _selectedPiece.GetPosition().Children.Clear();
+                    _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
+                    _selectedPiece = null;
                     _firstClick = true;
                 }
             }
@@ -110,28 +94,24 @@ namespace chess
         {
             foreach (var piece in PieceList.Where(piece => Equals(piece.GetPosition(), grid)))
             {
-                SelectedPiece = piece;
+                _selectedPiece = piece;
                 piece.SetMoveSet();
                 foreach (var move in piece.GetMoveSet())
                 {
-                    var iPanel = SelectedPiece.GetPosition().Parent as StackPanel;
-                    var iparent = iPanel.Parent as StackPanel;
-                    int myGrid = iPanel.Children.IndexOf(SelectedPiece.GetPosition()) + move.GetY();
-                    int myStack = iparent.Children.IndexOf(iPanel) + move.GetX();
+                    var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+                    int newY = coordinates.Item2 + move.GetY();
+                    int newX = coordinates.Item1 + move.GetX();
 
-                    if (myGrid < 8 && myStack < 8 && myGrid > -1 && myStack > -1 && move.GetIsActiv())
+                    if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
                     {
-                        var i = iparent.Children[myStack] as StackPanel;
-                        var x = i.Children[myGrid] as Grid;
-
                         var borderMoves = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.LimeGreen };
-                        x.Children.Add(borderMoves);
+                        _board.MyGrids[newX, newY].Children.Add(borderMoves);
                     }
                 }
                 var border = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.Yellow };
-                SelectedPiece.GetPosition().Children.Add(border);
+                _selectedPiece.GetPosition().Children.Add(border);
             }
-            if (SelectedPiece != null)
+            if (_selectedPiece != null)
             {
                 _firstClick = false;
             }
