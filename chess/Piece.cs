@@ -26,7 +26,7 @@ namespace chess
         protected COLOR Color;
         protected Grid Position;
         protected Canvas PieceImage;
-        private MoveSet _myMoveSet;
+        protected MoveSet MyMoveSet;
 
         public Grid GetPosition()
         {
@@ -40,7 +40,7 @@ namespace chess
 
         public void SetMoveSet()
         {
-            _myMoveSet = new MoveSet(Color, Piecetype, Position);
+            MyMoveSet = new MoveSet(Color, Piecetype, Position);
         }
 
         public COLOR GetColor()
@@ -50,7 +50,12 @@ namespace chess
 
         public List<Move> GetMoveSet()
         {
-            return _myMoveSet.GetMoves();
-        } 
+            return MyMoveSet.GetMoves();
+        }
+
+        public void SetPosition(Grid grid)
+        {
+            Position = grid;
+        }
     }
 }

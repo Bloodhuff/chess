@@ -16,7 +16,7 @@ namespace chess
 
         private Game()
         {
-            
+
         }
 
         public static Game GetInstance()
@@ -67,35 +67,121 @@ namespace chess
             {
                 if (!Equals(grid, _selectedPiece.GetPosition()))
                 {
+                    MakeMove(grid);
                 }
                 else
                 {
-                    foreach (var move in _selectedPiece.GetMoveSet())
-                    {
-                        var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
-                        int newY = coordinates.Item2 + move.GetY();
-                        int newX = coordinates.Item1 + move.GetX();
-                        if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
-                        {
-                            _board.MyGrids[newX, newY].Children.RemoveAt(_board.MyGrids[newX, newY].Children.Count == 1
-                                ? 0
-                                : 1);
-                        }
-                    }
-                    _selectedPiece.GetPosition().Children.Clear();
-                    _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
-                    _selectedPiece = null;
-                    _firstClick = true;
+                    DeselectPiece();
                 }
             }
         }
 
+        private void MakeMove(Grid grid)
+        {
+            var gridcoordinates = _board.GetArrayPosition(grid);
+            var selectedPieceCoordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+            foreach (var move in _selectedPiece.GetMoveSet())
+            {
+                if (gridcoordinates.Item1 == (selectedPieceCoordinates.Item1 + move.GetX()) && gridcoordinates.Item2 == (selectedPieceCoordinates.Item2 + move.GetY()) && move.GetIsActiv())
+                {
+
+
+                    if (_selectedPiece != null)
+                    {
+                        _selectedPiece.GetPosition().Children.Clear();
+                        foreach (var move1 in _selectedPiece.GetMoveSet())
+                        {
+                            var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+                            int newY = coordinates.Item2 + move1.GetY();
+                            int newX = coordinates.Item1 + move1.GetX();
+                            if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move1.GetIsActiv())
+                            {
+                                _board.MyGrids[newX, newY].Children.RemoveAt(
+                                    _board.MyGrids[newX, newY].Children.Count == 1
+                                        ? 0
+                                        : 1);
+                            }
+                        }
+                        Piece removePiece = null;
+                        foreach (var piece in PieceList.Where(piece => Equals(piece.GetPosition(), grid)))
+                        {
+                            removePiece = piece;
+                        }
+                        if (removePiece != null)
+                        {
+                            PieceList.Remove(removePiece);
+                            removePiece.GetPosition().Children.Clear();
+                        }
+
+                        if (_selectedPiece is Pawn)
+                        {
+                            var pawn = (Pawn)_selectedPiece;
+                            pawn.SethasMoved();
+                        }
+                        else if (_selectedPiece is Rook)
+                        {
+                            var pawn = (Rook)_selectedPiece;
+                            pawn.SethasMoved();
+                        }
+                        else if (_selectedPiece is King)
+                        {
+                            var pawn = (King)_selectedPiece;
+                            pawn.SethasMoved();
+                        }
+
+                        _selectedPiece.SetPosition(grid);
+                        _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
+                        _firstClick = true;
+                    }
+                    _selectedPiece = null;
+                }
+            }
+        }
+
+        private void DeselectPiece()
+        {
+            foreach (var move in _selectedPiece.GetMoveSet())
+            {
+                var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+                int newY = coordinates.Item2 + move.GetY();
+                int newX = coordinates.Item1 + move.GetX();
+                if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
+                {
+                    _board.MyGrids[newX, newY].Children.RemoveAt(_board.MyGrids[newX, newY].Children.Count == 1
+                        ? 0
+                        : 1);
+                }
+            }
+            _selectedPiece.GetPosition().Children.Clear();
+            _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
+            _selectedPiece = null;
+            _firstClick = true;
+        }
         private void SelectPiece(Grid grid)
         {
             foreach (var piece in PieceList.Where(piece => Equals(piece.GetPosition(), grid)))
             {
                 _selectedPiece = piece;
-                piece.SetMoveSet();
+                if (piece is Pawn)
+                {
+                    var pawn = (Pawn) piece;
+                    pawn.SetMoveSet();
+                }
+                else if(piece is Rook)
+                {
+                    var pawn = (Rook)piece;
+                    pawn.SetMoveSet();        
+                }
+                else if(piece is King)
+                {
+                    var pawn = (King)piece;
+                    pawn.SetMoveSet();                    
+                }
+                else
+                {
+                    piece.SetMoveSet();                    
+                }
+
                 foreach (var move in piece.GetMoveSet())
                 {
                     var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());

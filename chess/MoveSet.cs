@@ -7,7 +7,7 @@ namespace chess
     public class MoveSet
     {
         private readonly Piece.COLOR _color;
-        private bool HasMoved;
+        private readonly bool _hasMoved;
         private readonly List<Move> _movesList = new List<Move>();
         private readonly Board _board = Board.Instance;
         private readonly Grid _position;
@@ -17,6 +17,18 @@ namespace chess
         {
             _color = color;
             _position = position;
+            switch (piecetype)
+            {
+                case Piece.PIECETYPE.Pawn:
+                    Pawn();
+                    break;
+            }
+        }
+        public MoveSet(Piece.COLOR color, Piece.PIECETYPE piecetype, Grid position, bool hasmoved)
+        {
+            _color = color;
+            _position = position;
+            _hasMoved = hasmoved;
             switch (piecetype)
             {
                 case Piece.PIECETYPE.Pawn:
@@ -58,7 +70,7 @@ namespace chess
                         _movesList.Add(new Move(1, -1));
                     }
                 }
-                if (HasMoved == false && !block && !blockfirst)
+                if (_hasMoved == false && !block && !blockfirst)
                 {
                     _movesList.Add(new Move(0, -2));
                 }
@@ -95,7 +107,7 @@ namespace chess
                         _movesList.Add(new Move(1, 1));
                     }
                 }
-                if (HasMoved == false && !block && !blockfirst)
+                if (_hasMoved == false && !block && !blockfirst)
                 {
                     _movesList.Add(new Move(0, 2));
                 }
