@@ -64,6 +64,7 @@
     <Compile Include="Piece.cs" />
     <Compile Include="Queen.cs" />
     <Compile Include="Rook.cs" />
+    <Compile Include="YourIp.cs" />
     <Page Include="Board.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

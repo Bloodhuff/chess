@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -13,6 +17,9 @@ namespace chess
         public readonly List<Piece> PieceList = new List<Piece>();
         private Piece _selectedPiece;
         private bool _firstClick = true;
+        private Piece.COLOR _playerColor;
+        private Piece.COLOR _playerTurn = Piece.COLOR.White;
+        private Stream _ns;
 
         private Game()
         {
@@ -24,30 +31,55 @@ namespace chess
             return Instance ?? (Instance = new Game());
         }
 
+        public void HostMatch(Piece.COLOR playerColor)
+        {
+            _playerColor = playerColor;
+            var serverSocket = new TcpListener(IPAddress.Any, 65080);
+            serverSocket.Start();
+            Socket connectionSocket = serverSocket.AcceptSocket();
+            _ns = new NetworkStream(connectionSocket);
+            Start();
+
+        }
+
+        public void JoinMatch(string ip)
+        {
+            try
+            {
+                var clientSocket = new TcpClient(ip, 65080);
+                _ns = clientSocket.GetStream();
+                _board.MyLabel.Content = "Connected to: " + ip;
+                Start();
+            }
+            catch (Exception)
+            {
+                _board.TypeIP.Visibility = Visibility.Visible;
+                _board.Gameboard.Visibility = Visibility.Hidden;
+            }
+        }
         public void Start()
         {
             for (int i = 0; i < 8; i++)
             {
-                PieceList.Add(new Pawn(Piece.COLOR.White, _board.MyGrids[i, 6]));
-                PieceList.Add(new Pawn(Piece.COLOR.Black, _board.MyGrids[i, 1]));
+                PieceList.Add(new Pawn(Piece.COLOR.White, _board.MyBoarderArray[i, 6]));
+                PieceList.Add(new Pawn(Piece.COLOR.Black, _board.MyBoarderArray[i, 1]));
             }
-            PieceList.Add(new Pawn(Piece.COLOR.Black, _board.MyGrids[3, 5]));
-            PieceList.Add(new Rook(Piece.COLOR.White, _board.MyGrids[0, 7]));
-            PieceList.Add(new Knight(Piece.COLOR.White, _board.MyGrids[1, 7]));
-            PieceList.Add(new Bishop(Piece.COLOR.White, _board.MyGrids[2, 7]));
-            PieceList.Add(new Queen(Piece.COLOR.White, _board.MyGrids[3, 7]));
-            PieceList.Add(new King(Piece.COLOR.White, _board.MyGrids[4, 7]));
-            PieceList.Add(new Bishop(Piece.COLOR.White, _board.MyGrids[5, 7]));
-            PieceList.Add(new Knight(Piece.COLOR.White, _board.MyGrids[6, 7]));
-            PieceList.Add(new Rook(Piece.COLOR.White, _board.MyGrids[7, 7]));
-            PieceList.Add(new Rook(Piece.COLOR.Black, _board.MyGrids[0, 0]));
-            PieceList.Add(new Knight(Piece.COLOR.Black, _board.MyGrids[1, 0]));
-            PieceList.Add(new Bishop(Piece.COLOR.Black, _board.MyGrids[2, 0]));
-            PieceList.Add(new Queen(Piece.COLOR.Black, _board.MyGrids[3, 0]));
-            PieceList.Add(new King(Piece.COLOR.Black, _board.MyGrids[4, 0]));
-            PieceList.Add(new Bishop(Piece.COLOR.Black, _board.MyGrids[5, 0]));
-            PieceList.Add(new Knight(Piece.COLOR.Black, _board.MyGrids[6, 0]));
-            PieceList.Add(new Rook(Piece.COLOR.Black, _board.MyGrids[7, 0]));
+            PieceList.Add(new Rook(Piece.COLOR.White, _board.MyBoarderArray[0, 7]));
+            PieceList.Add(new Knight(Piece.COLOR.White, _board.MyBoarderArray[1, 7]));
+            PieceList.Add(new Bishop(Piece.COLOR.White, _board.MyBoarderArray[2, 7]));
+            PieceList.Add(new Queen(Piece.COLOR.White, _board.MyBoarderArray[3, 7]));
+            PieceList.Add(new King(Piece.COLOR.White, _board.MyBoarderArray[4, 7]));
+            PieceList.Add(new Bishop(Piece.COLOR.White, _board.MyBoarderArray[5, 7]));
+            PieceList.Add(new Knight(Piece.COLOR.White, _board.MyBoarderArray[6, 7]));
+            PieceList.Add(new Rook(Piece.COLOR.White, _board.MyBoarderArray[7, 7]));
+            PieceList.Add(new Rook(Piece.COLOR.Black, _board.MyBoarderArray[0, 0]));
+            PieceList.Add(new Knight(Piece.COLOR.Black, _board.MyBoarderArray[1, 0]));
+            PieceList.Add(new Bishop(Piece.COLOR.Black, _board.MyBoarderArray[2, 0]));
+            PieceList.Add(new Queen(Piece.COLOR.Black, _board.MyBoarderArray[3, 0]));
+            PieceList.Add(new King(Piece.COLOR.Black, _board.MyBoarderArray[4, 0]));
+            PieceList.Add(new Bishop(Piece.COLOR.Black, _board.MyBoarderArray[5, 0]));
+            PieceList.Add(new Knight(Piece.COLOR.Black, _board.MyBoarderArray[6, 0]));
+            PieceList.Add(new Rook(Piece.COLOR.Black, _board.MyBoarderArray[7, 0]));
 
             foreach (var p in PieceList)
             {
@@ -57,21 +89,29 @@ namespace chess
             }
         }
 
+        public Piece.COLOR GetPlayerColor()
+        {
+            return _playerColor;
+        }
+
         public void HandelClick(Grid grid)
         {
-            if (_firstClick)
+            if (_playerTurn == _playerColor)
             {
-                SelectPiece(grid);
-            }
-            else
-            {
-                if (!Equals(grid, _selectedPiece.GetPosition()))
+                if (_firstClick)
                 {
-                    MakeMove(grid);
+                    SelectPiece(grid);
                 }
                 else
                 {
-                    DeselectPiece();
+                    if (!Equals(grid, _selectedPiece.GetPosition()))
+                    {
+                        MakeMove(grid);
+                    }
+                    else
+                    {
+                        DeselectPiece();
+                    }
                 }
             }
         }
@@ -94,10 +134,10 @@ namespace chess
                             int newX = coordinates.Item1 + move1.GetX();
                             if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move1.GetIsActiv())
                             {
-                                if (_board.MyGrids[newX, newY].Children.Count != 0)
+                                if (_board.MyBoarderArray[newX, newY].Children.Count != 0)
                                 {
-                                    _board.MyGrids[newX, newY].Children.RemoveAt(
-                                        _board.MyGrids[newX, newY].Children.Count == 1
+                                    _board.MyBoarderArray[newX, newY].Children.RemoveAt(
+                                        _board.MyBoarderArray[newX, newY].Children.Count == 1
                                             ? 0
                                             : 1);
                                 }
@@ -133,6 +173,7 @@ namespace chess
                         _firstClick = true;
                     }
                     _selectedPiece = null;
+                    _playerTurn = _playerTurn == Piece.COLOR.White ? Piece.COLOR.Black : Piece.COLOR.White;
                 }
             }
         }
@@ -146,7 +187,7 @@ namespace chess
                 int newX = coordinates.Item1 + move.GetX();
                 if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
                 {
-                    _board.MyGrids[newX, newY].Children.RemoveAt(_board.MyGrids[newX, newY].Children.Count == 1
+                    _board.MyBoarderArray[newX, newY].Children.RemoveAt(_board.MyBoarderArray[newX, newY].Children.Count == 1
                         ? 0
                         : 1);
                 }
@@ -189,7 +230,7 @@ namespace chess
                     if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
                     {
                         var borderMoves = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.LimeGreen };
-                        _board.MyGrids[newX, newY].Children.Add(borderMoves);
+                        _board.MyBoarderArray[newX, newY].Children.Add(borderMoves);
                     }
                 }
                 var border = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.Yellow };

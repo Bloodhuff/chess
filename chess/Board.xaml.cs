@@ -15,18 +15,21 @@ using System.Windows.Shapes;
 namespace chess
 {
     /// <summary>
-    /// Interaction logic for Board.xaml
+    /// The board are mostly used to keep track of the board.
+    /// It will put all squares in to a array for easy access
+    /// from the other classes. 
+    /// Also it is able to find coordinates on the board
+    /// by useing the GetArrayPosition.
     /// </summary>
     public partial class Board : Window
     {
         public static Board Instance;
-        public Grid[,] MyGrids = new Grid[8, 8];
+        public Grid[,] MyBoarderArray = new Grid[8, 8];
         public Board()
         {
             Instance = this;
             InitializeComponent();
             PutGridInArray();
-            Game.GetInstance().Start();
         }
 
         private void grid_Click(object sender, EventArgs eventArgs)
@@ -37,87 +40,123 @@ namespace chess
 
         private void PutGridInArray()
         {
-            MyGrids[0, 0] = A8;
-            MyGrids[0, 1] = A7;
-            MyGrids[0, 2] = A6;
-            MyGrids[0, 3] = A5;
-            MyGrids[0, 4] = A4;
-            MyGrids[0, 5] = A3;
-            MyGrids[0, 6] = A2;
-            MyGrids[0, 7] = A1;
-            MyGrids[1, 0] = B8;
-            MyGrids[1, 1] = B7;
-            MyGrids[1, 2] = B6;
-            MyGrids[1, 3] = B5;
-            MyGrids[1, 4] = B4;
-            MyGrids[1, 5] = B3;
-            MyGrids[1, 6] = B2;
-            MyGrids[1, 7] = B1;
-            MyGrids[2, 0] = C8;
-            MyGrids[2, 1] = C7;
-            MyGrids[2, 2] = C6;
-            MyGrids[2, 3] = C5;
-            MyGrids[2, 4] = C4;
-            MyGrids[2, 5] = C3;
-            MyGrids[2, 6] = C2;
-            MyGrids[2, 7] = C1;
-            MyGrids[3, 0] = D8;
-            MyGrids[3, 1] = D7;
-            MyGrids[3, 2] = D6;
-            MyGrids[3, 3] = D5;
-            MyGrids[3, 4] = D4;
-            MyGrids[3, 5] = D3;
-            MyGrids[3, 6] = D2;
-            MyGrids[3, 7] = D1;
-            MyGrids[4, 0] = E8;
-            MyGrids[4, 1] = E7;
-            MyGrids[4, 2] = E6;
-            MyGrids[4, 3] = E5;
-            MyGrids[4, 4] = E4;
-            MyGrids[4, 5] = E3;
-            MyGrids[4, 6] = E2;
-            MyGrids[4, 7] = E1;
-            MyGrids[5, 0] = F8;
-            MyGrids[5, 1] = F7;
-            MyGrids[5, 2] = F6;
-            MyGrids[5, 3] = F5;
-            MyGrids[5, 4] = F4;
-            MyGrids[5, 5] = F3;
-            MyGrids[5, 6] = F2;
-            MyGrids[5, 7] = F1;
-            MyGrids[6, 0] = G8;
-            MyGrids[6, 1] = G7;
-            MyGrids[6, 2] = G6;
-            MyGrids[6, 3] = G5;
-            MyGrids[6, 4] = G4;
-            MyGrids[6, 5] = G3;
-            MyGrids[6, 6] = G2;
-            MyGrids[6, 7] = G1;
-            MyGrids[7, 0] = H8;
-            MyGrids[7, 1] = H7;
-            MyGrids[7, 2] = H6;
-            MyGrids[7, 3] = H5;
-            MyGrids[7, 4] = H4;
-            MyGrids[7, 5] = H3;
-            MyGrids[7, 6] = H2;
-            MyGrids[7, 7] = H1;
+            MyBoarderArray[0, 0] = A8;
+            MyBoarderArray[0, 1] = A7;
+            MyBoarderArray[0, 2] = A6;
+            MyBoarderArray[0, 3] = A5;
+            MyBoarderArray[0, 4] = A4;
+            MyBoarderArray[0, 5] = A3;
+            MyBoarderArray[0, 6] = A2;
+            MyBoarderArray[0, 7] = A1;
+            MyBoarderArray[1, 0] = B8;
+            MyBoarderArray[1, 1] = B7;
+            MyBoarderArray[1, 2] = B6;
+            MyBoarderArray[1, 3] = B5;
+            MyBoarderArray[1, 4] = B4;
+            MyBoarderArray[1, 5] = B3;
+            MyBoarderArray[1, 6] = B2;
+            MyBoarderArray[1, 7] = B1;
+            MyBoarderArray[2, 0] = C8;
+            MyBoarderArray[2, 1] = C7;
+            MyBoarderArray[2, 2] = C6;
+            MyBoarderArray[2, 3] = C5;
+            MyBoarderArray[2, 4] = C4;
+            MyBoarderArray[2, 5] = C3;
+            MyBoarderArray[2, 6] = C2;
+            MyBoarderArray[2, 7] = C1;
+            MyBoarderArray[3, 0] = D8;
+            MyBoarderArray[3, 1] = D7;
+            MyBoarderArray[3, 2] = D6;
+            MyBoarderArray[3, 3] = D5;
+            MyBoarderArray[3, 4] = D4;
+            MyBoarderArray[3, 5] = D3;
+            MyBoarderArray[3, 6] = D2;
+            MyBoarderArray[3, 7] = D1;
+            MyBoarderArray[4, 0] = E8;
+            MyBoarderArray[4, 1] = E7;
+            MyBoarderArray[4, 2] = E6;
+            MyBoarderArray[4, 3] = E5;
+            MyBoarderArray[4, 4] = E4;
+            MyBoarderArray[4, 5] = E3;
+            MyBoarderArray[4, 6] = E2;
+            MyBoarderArray[4, 7] = E1;
+            MyBoarderArray[5, 0] = F8;
+            MyBoarderArray[5, 1] = F7;
+            MyBoarderArray[5, 2] = F6;
+            MyBoarderArray[5, 3] = F5;
+            MyBoarderArray[5, 4] = F4;
+            MyBoarderArray[5, 5] = F3;
+            MyBoarderArray[5, 6] = F2;
+            MyBoarderArray[5, 7] = F1;
+            MyBoarderArray[6, 0] = G8;
+            MyBoarderArray[6, 1] = G7;
+            MyBoarderArray[6, 2] = G6;
+            MyBoarderArray[6, 3] = G5;
+            MyBoarderArray[6, 4] = G4;
+            MyBoarderArray[6, 5] = G3;
+            MyBoarderArray[6, 6] = G2;
+            MyBoarderArray[6, 7] = G1;
+            MyBoarderArray[7, 0] = H8;
+            MyBoarderArray[7, 1] = H7;
+            MyBoarderArray[7, 2] = H6;
+            MyBoarderArray[7, 3] = H5;
+            MyBoarderArray[7, 4] = H4;
+            MyBoarderArray[7, 5] = H3;
+            MyBoarderArray[7, 6] = H2;
+            MyBoarderArray[7, 7] = H1;
         }
 
         public Tuple<int, int> GetArrayPosition(Grid value)
         {
-            int w = MyGrids.GetLength(0);
-            int h = MyGrids.GetLength(1);
+            int w = MyBoarderArray.GetLength(0);
+            int h = MyBoarderArray.GetLength(1);
 
             for (int x = 0; x < w; ++x)
             {
                 for (int y = 0; y < h; ++y)
                 {
-                    if (MyGrids[x, y].Equals(value)) { 
+                    if (MyBoarderArray[x, y].Equals(value)) { 
                     return Tuple.Create(x, y);
                     }
                 }
             }
             return Tuple.Create(-1, -1);
+        }
+
+        private void HostButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChooseRole.Visibility = Visibility.Hidden;
+            ChooseColor.Visibility = Visibility.Visible;
+            var yourIp = new YourIp();
+            MyLabel.Content = "Your ip is: "+yourIp.GetIp();
+        }
+
+        private void WhiteButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChooseColor.Visibility = Visibility.Hidden;
+            Game.GetInstance().HostMatch(Piece.COLOR.White);
+            Gameboard.Visibility = Visibility.Visible;
+        }
+
+        private void BlackButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChooseColor.Visibility = Visibility.Hidden;
+            GameBoardTransform.Angle = 180;
+            Game.GetInstance().HostMatch(Piece.COLOR.Black);
+            Gameboard.Visibility = Visibility.Visible;
+        }
+
+        private void JoinButton_Click(object sender, RoutedEventArgs e)
+        {
+            ChooseRole.Visibility = Visibility.Hidden;
+            TypeIP.Visibility = Visibility.Visible;
+        }
+
+        private void ConnectButton_Click(object sender, RoutedEventArgs e)
+        {
+            TypeIP.Visibility = Visibility.Hidden;
+            Gameboard.Visibility = Visibility.Visible;
+            Game.GetInstance().JoinMatch(IpTextBox.Text);
         }
     }
 }

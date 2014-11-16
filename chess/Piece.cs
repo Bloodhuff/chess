@@ -7,8 +7,8 @@ namespace chess
     {
         public enum COLOR
         {
-            Black,
-            White
+            White,
+            Black
         }
 
         public enum PIECETYPE
