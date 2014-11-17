@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace chess
 {
@@ -21,8 +12,9 @@ namespace chess
     /// Also it is able to find coordinates on the board
     /// by useing the GetArrayPosition.
     /// </summary>
-    public partial class Board : Window
+    public partial class Board
     {
+        private readonly SynchronizationContext _mainThread = SynchronizationContext.Current;
         public static Board Instance;
         public Grid[,] MyBoarderArray = new Grid[8, 8];
         public Board()
@@ -30,6 +22,7 @@ namespace chess
             Instance = this;
             InitializeComponent();
             PutGridInArray();
+            Game.GetInstance().SetMainThread(_mainThread);
         }
 
         private void grid_Click(object sender, EventArgs eventArgs)
@@ -115,8 +108,9 @@ namespace chess
             {
                 for (int y = 0; y < h; ++y)
                 {
-                    if (MyBoarderArray[x, y].Equals(value)) { 
-                    return Tuple.Create(x, y);
+                    if (MyBoarderArray[x, y].Equals(value))
+                    {
+                        return Tuple.Create(x, y);
                     }
                 }
             }
@@ -128,7 +122,7 @@ namespace chess
             ChooseRole.Visibility = Visibility.Hidden;
             ChooseColor.Visibility = Visibility.Visible;
             var yourIp = new YourIp();
-            MyLabel.Content = "Your ip is: "+yourIp.GetIp();
+            MyLabel.Content = "Your ip is: " + yourIp.GetIp();
         }
 
         private void WhiteButton_Click(object sender, RoutedEventArgs e)

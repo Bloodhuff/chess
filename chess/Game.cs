@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -16,23 +14,28 @@ namespace chess
     class Game
     {
         public static Game Instance = null;
+        private SynchronizationContext _mainThread;
         private readonly Board _board = Board.Instance;
         public readonly List<Piece> PieceList = new List<Piece>();
         private Piece _selectedPiece;
         private bool _firstClick = true;
         private Piece.COLOR _playerColor;
         private Piece.COLOR _playerTurn = Piece.COLOR.White;
-        private Stream _ns = null;
+        private Stream _ns;
         private NetworkHandler _nh;
 
         private Game()
         {
-
         }
 
         public static Game GetInstance()
         {
             return Instance ?? (Instance = new Game());
+        }
+
+        public void SetMainThread(SynchronizationContext thread)
+        {
+            _mainThread = thread;
         }
 
         public void HostMatch(Piece.COLOR playerColor)
@@ -73,10 +76,6 @@ namespace chess
         }
         public void Start()
         {
-            if (_playerColor == Piece.COLOR.Black)
-            {
-                _board.GameBoardTransform.Angle = 180;
-            }
             for (int i = 0; i < 8; i++)
             {
                 PieceList.Add(new Pawn(Piece.COLOR.White, _board.MyBoarderArray[i, 6]));
@@ -101,10 +100,15 @@ namespace chess
 
             foreach (var p in PieceList)
             {
-                Grid grid = p.GetPosition();
-                Canvas image = p.GetPieceImage();
+                var grid = p.GetPosition();
+                var image = p.GetPieceImage();
                 grid.Children.Add(image);
             }
+            if (_playerColor == Piece.COLOR.Black)
+            {
+                _board.GameBoardTransform.Angle = 180;
+            }
+            new Thread(_nh.GetRequest).Start();
         }
 
         public Piece.COLOR GetPlayerColor()
@@ -143,13 +147,14 @@ namespace chess
         {
             var gridcoordinates = _board.GetArrayPosition(grid);
             var selectedPieceCoordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+            string request = selectedPieceCoordinates.Item1 + "," + selectedPieceCoordinates.Item2 + "," + gridcoordinates.Item1 + "," + gridcoordinates.Item2;
             foreach (var move in _selectedPiece.GetMoveSet())
             {
                 if (gridcoordinates.Item1 == (selectedPieceCoordinates.Item1 + move.GetX()) && gridcoordinates.Item2 == (selectedPieceCoordinates.Item2 + move.GetY()) && move.GetIsActiv())
                 {
                     if (_selectedPiece != null)
                     {
-                        _selectedPiece.GetPosition().Children.Clear();
+                        _mainThread.Send(state => _selectedPiece.GetPosition().Children.Clear(), null);
                         foreach (var move1 in _selectedPiece.GetMoveSet())
                         {
                             var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
@@ -157,13 +162,16 @@ namespace chess
                             int newX = coordinates.Item1 + move1.GetX();
                             if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move1.GetIsActiv())
                             {
-                                if (_board.MyBoarderArray[newX, newY].Children.Count != 0)
+                                _mainThread.Send(state =>
                                 {
-                                    _board.MyBoarderArray[newX, newY].Children.RemoveAt(
-                                        _board.MyBoarderArray[newX, newY].Children.Count == 1
-                                            ? 0
-                                            : 1);
-                                }
+                                    if (_board.MyBoarderArray[newX, newY].Children.Count != 0)
+                                    {
+                                        _board.MyBoarderArray[newX, newY].Children.RemoveAt(
+                                            _board.MyBoarderArray[newX, newY].Children.Count == 1
+                                                ? 0
+                                                : 1);
+                                    }
+                                }, null);
                             }
                         }
                         Piece removePiece = null;
@@ -174,7 +182,7 @@ namespace chess
                         if (removePiece != null)
                         {
                             PieceList.Remove(removePiece);
-                            removePiece.GetPosition().Children.Clear();
+                            _mainThread.Send(state => removePiece.GetPosition().Children.Clear(), null);
                         }
                         if (_selectedPiece is Pawn)
                         {
@@ -192,10 +200,14 @@ namespace chess
                             pawn.SethasMoved();
                         }
                         _selectedPiece.SetPosition(grid);
-                        _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
+                        _mainThread.Send(state => _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage()), null);
                         _firstClick = true;
                     }
                     _selectedPiece = null;
+                    if (_playerTurn == _playerColor)
+                    {
+                        _nh.SendRequest(request);
+                    }
                     _playerTurn = _playerTurn == Piece.COLOR.White ? Piece.COLOR.Black : Piece.COLOR.White;
                 }
             }
@@ -210,13 +222,19 @@ namespace chess
                 int newX = coordinates.Item1 + move.GetX();
                 if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
                 {
-                    _board.MyBoarderArray[newX, newY].Children.RemoveAt(_board.MyBoarderArray[newX, newY].Children.Count == 1
-                        ? 0
-                        : 1);
+                    _mainThread.Send(
+                        state =>
+                            _board.MyBoarderArray[newX, newY].Children.RemoveAt(
+                                _board.MyBoarderArray[newX, newY].Children.Count == 1
+                                    ? 0
+                                    : 1), null);
                 }
             }
-            _selectedPiece.GetPosition().Children.Clear();
-            _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
+            _mainThread.Send(state =>
+            {
+                _selectedPiece.GetPosition().Children.Clear();
+                _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage());
+            }, null);
             _selectedPiece = null;
             _firstClick = true;
         }
@@ -224,40 +242,49 @@ namespace chess
         {
             foreach (var piece in PieceList.Where(piece => Equals(piece.GetPosition(), grid)))
             {
-                _selectedPiece = piece;
-                if (piece is Pawn)
+                if (piece.GetColor() == _playerTurn)
                 {
-                    var pawn = (Pawn)piece;
-                    pawn.SetMoveSet();
-                }
-                else if (piece is Rook)
-                {
-                    var pawn = (Rook)piece;
-                    pawn.SetMoveSet();
-                }
-                else if (piece is King)
-                {
-                    var pawn = (King)piece;
-                    pawn.SetMoveSet();
-                }
-                else
-                {
-                    piece.SetMoveSet();
-                }
-                foreach (var move in piece.GetMoveSet())
-                {
-                    var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
-                    int newY = coordinates.Item2 + move.GetY();
-                    int newX = coordinates.Item1 + move.GetX();
-
-                    if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
+                    _selectedPiece = piece;
+                    if (piece is Pawn)
                     {
-                        var borderMoves = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.LimeGreen };
-                        _board.MyBoarderArray[newX, newY].Children.Add(borderMoves);
+                        var pawn = (Pawn)piece;
+                        pawn.SetMoveSet();
                     }
+                    else if (piece is Rook)
+                    {
+                        var pawn = (Rook)piece;
+                        pawn.SetMoveSet();
+                    }
+                    else if (piece is King)
+                    {
+                        var pawn = (King)piece;
+                        pawn.SetMoveSet();
+                    }
+                    else
+                    {
+                        piece.SetMoveSet();
+                    }
+                    foreach (var move in piece.GetMoveSet())
+                    {
+                        var coordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
+                        int newY = coordinates.Item2 + move.GetY();
+                        int newX = coordinates.Item1 + move.GetX();
+                        if (newY < 8 && newX < 8 && newY > -1 && newX > -1 && move.GetIsActiv())
+                        {
+                            _mainThread.Send(state =>
+                            {
+                                var borderMoves = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.LimeGreen };
+                                _board.MyBoarderArray[newX, newY].Children.Add(borderMoves);
+                            }, null);
+
+                        }
+                    }
+                    _mainThread.Send(state =>
+                    {
+                        var border = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.Yellow };
+                        _selectedPiece.GetPosition().Children.Add(border);
+                    }, null);
                 }
-                var border = new Border { BorderThickness = new Thickness(6), BorderBrush = Brushes.Yellow };
-                _selectedPiece.GetPosition().Children.Add(border);
             }
             if (_selectedPiece != null)
             {

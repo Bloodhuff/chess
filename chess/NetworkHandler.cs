@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace chess
 {
@@ -13,7 +7,7 @@ namespace chess
     {
         private readonly StreamReader _sr;
         private readonly StreamWriter _sw;
-        public bool FirstRequest = true;
+        private readonly Board _board = Board.Instance;
 
         public NetworkHandler(Stream ns)
         {
@@ -40,23 +34,27 @@ namespace chess
             _sw.Flush();
         }
 
-        public void SetFirstRequestFalse()
+        public void GetRequest()
         {
-            while (FirstRequest)
+            while (true)
             {
-                _sr.ReadLine();
-                FirstRequest = false;
+                var readLine = _sr.ReadLine();
+                if (readLine != null)
+                {
+                    string[] request = readLine.Split(',');
+                    int pieceX = Convert.ToInt32(request[0]);
+                    int pieceY = Convert.ToInt32(request[1]);
+                    int moveToX = Convert.ToInt32(request[2]);
+                    int moveToY = Convert.ToInt32(request[3]);
+                    Game.GetInstance().SelectPiece(_board.MyBoarderArray[pieceX, pieceY]);
+                    Game.GetInstance().MakeMove(_board.MyBoarderArray[moveToX, moveToY]);
+                }
             }
         }
 
-        public string GetRequest()
+        public void SendRequest(string request)
         {
-            return _sr.ReadLine();
-        }
-
-        public void SendRequest()
-        {
-            _sw.WriteLine("test");        
+            _sw.WriteLine(request);
             _sw.Flush();
         }
     }
