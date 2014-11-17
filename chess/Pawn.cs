@@ -5,7 +5,7 @@ namespace chess
     class Pawn : Piece
     {
         private bool _hasMoved;
-        private bool Passantable = false;
+        private bool _passantAble;
         public Pawn(COLOR color, Grid position)
         {
             Piecetype = PIECETYPE.Pawn;
@@ -23,6 +23,15 @@ namespace chess
         public new void SetMoveSet()
         {
             MyMoveSet = new MoveSet(Color, Piecetype, Position, _hasMoved);
+        }
+
+        public bool GetPassantAble()
+        {
+            return _passantAble;
+        }
+        public void SetPassantAble(bool status)
+        {
+            _passantAble = status;
         }
     }
 }

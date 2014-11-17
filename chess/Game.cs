@@ -179,15 +179,48 @@ namespace chess
                         {
                             removePiece = piece;
                         }
+                        foreach (var piece in PieceList.Where(piece => (Equals(_board.MyBoarderArray[gridcoordinates.Item1, (gridcoordinates.Item2 - 1)], piece.GetPosition()) && _selectedPiece.GetColor() == Piece.COLOR.Black) || (Equals(_board.MyBoarderArray[gridcoordinates.Item1, (gridcoordinates.Item2 + 1)], piece.GetPosition()) && _selectedPiece.GetColor() == Piece.COLOR.White)))
+                        {
+                            if (piece is Pawn)
+                            {
+                                var pawn = (Pawn)piece;
+                                if (pawn.GetPassantAble() && _selectedPiece is Pawn)
+                                {
+                                    removePiece = piece;
+                                }
+                            }
+                        }
                         if (removePiece != null)
                         {
                             PieceList.Remove(removePiece);
                             _mainThread.Send(state => removePiece.GetPosition().Children.Clear(), null);
                         }
+                        foreach (var piece in PieceList)
+                        {
+                            if (piece is Pawn)
+                            {
+                                var pawn = (Pawn)piece;
+                                pawn.SetPassantAble(false);
+                            }
+                        }
                         if (_selectedPiece is Pawn)
                         {
                             var pawn = (Pawn)_selectedPiece;
                             pawn.SethasMoved();
+                            if (_selectedPiece.GetColor() == Piece.COLOR.White)
+                            {
+                                if (Equals(_board.MyBoarderArray[selectedPieceCoordinates.Item1, (selectedPieceCoordinates.Item2 - 2)], grid))
+                                {
+                                    pawn.SetPassantAble(true);
+                                }
+                            }
+                            else
+                            {
+                                if (Equals(_board.MyBoarderArray[selectedPieceCoordinates.Item1, (selectedPieceCoordinates.Item2 + 2)], grid))
+                                {
+                                    pawn.SetPassantAble(true);
+                                }
+                            }
                         }
                         else if (_selectedPiece is Rook)
                         {

@@ -82,6 +82,23 @@ namespace chess
                     {
                         _movesList.Add(new Move(1, -1));
                     }
+                    if (piece is Pawn)
+                    {
+                        var pawn = (Pawn) piece;
+                        if (_color != piece.GetColor() &&
+                            (((_positionTuple.Item2) == tempTuple.Item2) &&
+                             (_positionTuple.Item1 + 1) == tempTuple.Item1) && pawn.GetPassantAble())
+                        {
+                            _movesList.Add(new Move(1, -1));
+                        }
+                        if (_color != piece.GetColor() &&
+                            (((_positionTuple.Item2) == tempTuple.Item2) &&
+                             (_positionTuple.Item1 - 1) == tempTuple.Item1) && pawn.GetPassantAble())
+                        {
+                            _movesList.Add(new Move(-1, -1));
+                        }
+                    }
+
                 }
                 if (_hasMoved == false && !block && !blockfirst)
                 {
@@ -118,6 +135,22 @@ namespace chess
                          (_positionTuple.Item1 + 1) == tempTuple.Item1))
                     {
                         _movesList.Add(new Move(1, 1));
+                    }
+                    if (piece is Pawn)
+                    {
+                        var pawn = (Pawn)piece;
+                        if (_color != piece.GetColor() &&
+                            (((_positionTuple.Item2) == tempTuple.Item2) &&
+                             (_positionTuple.Item1 + 1) == tempTuple.Item1) && pawn.GetPassantAble())
+                        {
+                            _movesList.Add(new Move(1, 1));
+                        }
+                        if (_color != piece.GetColor() &&
+                            (((_positionTuple.Item2) == tempTuple.Item2) &&
+                             (_positionTuple.Item1 - 1) == tempTuple.Item1) && pawn.GetPassantAble())
+                        {
+                            _movesList.Add(new Move(-1, 1));
+                        }
                     }
                 }
                 if (_hasMoved == false && !block && !blockfirst)
