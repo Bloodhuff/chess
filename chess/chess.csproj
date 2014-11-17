@@ -61,6 +61,7 @@
     <Compile Include="King.cs" />
     <Compile Include="Move.cs" />
     <Compile Include="MoveSet.cs" />
+    <Compile Include="NetworkHandler.cs" />
     <Compile Include="Piece.cs" />
     <Compile Include="Queen.cs" />
     <Compile Include="Rook.cs" />

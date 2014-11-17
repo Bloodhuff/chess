@@ -94,6 +94,11 @@ namespace chess
             return _playerColor;
         }
 
+        public void SetPlayerColor(Piece.COLOR playercolor)
+        {
+            _playerColor = playercolor;
+        }
+
         public void HandelClick(Grid grid)
         {
             if (_playerTurn == _playerColor)
@@ -116,7 +121,7 @@ namespace chess
             }
         }
 
-        private void MakeMove(Grid grid)
+        public void MakeMove(Grid grid)
         {
             var gridcoordinates = _board.GetArrayPosition(grid);
             var selectedPieceCoordinates = _board.GetArrayPosition(_selectedPiece.GetPosition());
@@ -197,7 +202,7 @@ namespace chess
             _selectedPiece = null;
             _firstClick = true;
         }
-        private void SelectPiece(Grid grid)
+        public void SelectPiece(Grid grid)
         {
             foreach (var piece in PieceList.Where(piece => Equals(piece.GetPosition(), grid)))
             {
