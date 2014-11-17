@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,7 +22,8 @@ namespace chess
         private bool _firstClick = true;
         private Piece.COLOR _playerColor;
         private Piece.COLOR _playerTurn = Piece.COLOR.White;
-        private Stream _ns;
+        private Stream _ns = null;
+        private NetworkHandler _nh;
 
         private Game()
         {
@@ -36,29 +40,43 @@ namespace chess
             _playerColor = playerColor;
             var serverSocket = new TcpListener(IPAddress.Any, 65080);
             serverSocket.Start();
-            Socket connectionSocket = serverSocket.AcceptSocket();
+            var connectionSocket = serverSocket.AcceptSocket();
             _ns = new NetworkStream(connectionSocket);
+            _nh = new NetworkHandler(_ns);
+            _nh.SendPlayerColor();
             Start();
-
         }
 
         public void JoinMatch(string ip)
         {
             try
             {
+                if (ip == "")
+                {
+                    ip = "localhost";
+                }
                 var clientSocket = new TcpClient(ip, 65080);
                 _ns = clientSocket.GetStream();
-                _board.MyLabel.Content = "Connected to: " + ip;
-                Start();
+                _nh = new NetworkHandler(_ns);
             }
             catch (Exception)
             {
                 _board.TypeIP.Visibility = Visibility.Visible;
                 _board.Gameboard.Visibility = Visibility.Hidden;
             }
+            if (_ns != null)
+            {
+                _board.MyLabel.Content = "Connected to: " + ip;
+                _nh.GetPlayerColor();
+                Start();
+            }
         }
         public void Start()
         {
+            if (_playerColor == Piece.COLOR.Black)
+            {
+                _board.GameBoardTransform.Angle = 180;
+            }
             for (int i = 0; i < 8; i++)
             {
                 PieceList.Add(new Pawn(Piece.COLOR.White, _board.MyBoarderArray[i, 6]));

@@ -141,7 +141,6 @@ namespace chess
         private void BlackButton_Click(object sender, RoutedEventArgs e)
         {
             ChooseColor.Visibility = Visibility.Hidden;
-            GameBoardTransform.Angle = 180;
             Game.GetInstance().HostMatch(Piece.COLOR.Black);
             Gameboard.Visibility = Visibility.Visible;
         }

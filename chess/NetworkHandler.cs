@@ -4,15 +4,16 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace chess
 {
     class NetworkHandler
     {
-        private StreamReader _sr;
-        private StreamWriter _sw;
-        private bool _firstRequest = true;
+        private readonly StreamReader _sr;
+        private readonly StreamWriter _sw;
+        public bool FirstRequest = true;
 
         public NetworkHandler(Stream ns)
         {
@@ -35,51 +36,28 @@ namespace chess
 
         public void SendPlayerColor()
         {
-            var sw = new Stopwatch();
-            sw.Start();
-            while (_firstRequest)
-            {
-                if (sw.Elapsed.Seconds >= 2)
-                {
-                    _sw.WriteLine(Game.GetInstance().GetPlayerColor());
-                    sw.Restart();
-                }
-            }
-            sw.Stop();
+            _sw.WriteLine(Game.GetInstance().GetPlayerColor().ToString());
+            _sw.Flush();
         }
 
         public void SetFirstRequestFalse()
         {
-            while (_firstRequest)
+            while (FirstRequest)
             {
                 _sr.ReadLine();
-                _firstRequest = false;
+                FirstRequest = false;
             }
         }
 
-        public void GetRequest()
+        public string GetRequest()
         {
-            string request = _sr.ReadLine();
-            while (_firstRequest)
-            {
-                if (request == Piece.COLOR.White.ToString())
-                {
-                    Game.GetInstance().SetPlayerColor(Piece.COLOR.Black);
-                    _firstRequest = false;
-                    Game.GetInstance().Start();
-                }
-                else
-                {
-                    Game.GetInstance().SetPlayerColor(Piece.COLOR.White);
-                    _firstRequest = false;
-                    Game.GetInstance().Start();
-                }
-            }
+            return _sr.ReadLine();
         }
 
         public void SendRequest()
         {
-            
+            _sw.WriteLine("test");        
+            _sw.Flush();
         }
     }
 }
