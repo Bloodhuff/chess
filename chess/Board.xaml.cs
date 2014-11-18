@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ namespace chess
         private readonly SynchronizationContext _mainThread = SynchronizationContext.Current;
         public static Board Instance;
         public Grid[,] MyBoarderArray = new Grid[8, 8];
+        public readonly List<Grid> BackRowList = new List<Grid>(); 
         public Board()
         {
             Instance = this;
@@ -31,6 +33,10 @@ namespace chess
             Game.GetInstance().HandelClick(myGrid);
         }
 
+        public SynchronizationContext GetMainThread()
+        {
+            return _mainThread;
+        }
         private void PutGridInArray()
         {
             MyBoarderArray[0, 0] = A8;
@@ -97,6 +103,11 @@ namespace chess
             MyBoarderArray[7, 5] = H3;
             MyBoarderArray[7, 6] = H2;
             MyBoarderArray[7, 7] = H1;
+            for (int i = 0; i < 8; ++i)
+            {
+                BackRowList.Add(MyBoarderArray[i,0]);
+                BackRowList.Add(MyBoarderArray[i,7]);
+            }
         }
 
         public Tuple<int, int> GetArrayPosition(Grid value)

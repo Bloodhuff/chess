@@ -179,14 +179,17 @@ namespace chess
                         {
                             removePiece = piece;
                         }
-                        foreach (var piece in PieceList.Where(piece => (Equals(_board.MyBoarderArray[gridcoordinates.Item1, (gridcoordinates.Item2 - 1)], piece.GetPosition()) && _selectedPiece.GetColor() == Piece.COLOR.Black) || (Equals(_board.MyBoarderArray[gridcoordinates.Item1, (gridcoordinates.Item2 + 1)], piece.GetPosition()) && _selectedPiece.GetColor() == Piece.COLOR.White)))
+                        if ((gridcoordinates.Item2 - 1) > -1 && (gridcoordinates.Item2 + 1) < 8)
                         {
-                            if (piece is Pawn)
+                            foreach (var piece in PieceList.Where(piece => (Equals(_board.MyBoarderArray[gridcoordinates.Item1, (gridcoordinates.Item2 - 1)], piece.GetPosition()) && _selectedPiece.GetColor() == Piece.COLOR.Black) || (Equals(_board.MyBoarderArray[gridcoordinates.Item1, (gridcoordinates.Item2 + 1)], piece.GetPosition()) && _selectedPiece.GetColor() == Piece.COLOR.White)))
                             {
-                                var pawn = (Pawn)piece;
-                                if (pawn.GetPassantAble() && _selectedPiece is Pawn)
+                                if (piece is Pawn)
                                 {
-                                    removePiece = piece;
+                                    var pawn = (Pawn)piece;
+                                    if (pawn.GetPassantAble() && _selectedPiece is Pawn)
+                                    {
+                                        removePiece = piece;
+                                    }
                                 }
                             }
                         }
@@ -207,30 +210,40 @@ namespace chess
                         {
                             var pawn = (Pawn)_selectedPiece;
                             pawn.SethasMoved();
-                            if (_selectedPiece.GetColor() == Piece.COLOR.White)
+                            if ((selectedPieceCoordinates.Item2 - 2) > -1 && (selectedPieceCoordinates.Item2 + 2) < 8)
                             {
-                                if (Equals(_board.MyBoarderArray[selectedPieceCoordinates.Item1, (selectedPieceCoordinates.Item2 - 2)], grid))
+                                if (_selectedPiece.GetColor() == Piece.COLOR.White)
                                 {
-                                    pawn.SetPassantAble(true);
+                                    if (Equals(_board.MyBoarderArray[selectedPieceCoordinates.Item1, (selectedPieceCoordinates.Item2 - 2)], grid))
+                                    {
+                                        pawn.SetPassantAble(true);
+                                    }
+                                }
+                                else
+                                {
+                                    if (Equals(_board.MyBoarderArray[selectedPieceCoordinates.Item1, (selectedPieceCoordinates.Item2 + 2)], grid))
+                                    {
+                                        pawn.SetPassantAble(true);
+                                    }
                                 }
                             }
-                            else
+                            foreach (var grid1 in _board.BackRowList)
                             {
-                                if (Equals(_board.MyBoarderArray[selectedPieceCoordinates.Item1, (selectedPieceCoordinates.Item2 + 2)], grid))
+                                if (grid == grid1)
                                 {
-                                    pawn.SetPassantAble(true);
+                                    _mainThread.Send(state => { _selectedPiece = new Queen(_playerTurn, grid); },null);
                                 }
                             }
                         }
                         else if (_selectedPiece is Rook)
                         {
-                            var pawn = (Rook)_selectedPiece;
-                            pawn.SethasMoved();
+                            var rook = (Rook)_selectedPiece;
+                            rook.SethasMoved();
                         }
                         else if (_selectedPiece is King)
                         {
-                            var pawn = (King)_selectedPiece;
-                            pawn.SethasMoved();
+                            var king = (King)_selectedPiece;
+                            king.SethasMoved();
                         }
                         _selectedPiece.SetPosition(grid);
                         _mainThread.Send(state => _selectedPiece.GetPosition().Children.Add(_selectedPiece.GetPieceImage()), null);
