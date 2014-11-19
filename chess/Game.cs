@@ -229,9 +229,14 @@ namespace chess
                             }
                             foreach (var grid1 in _board.BackRowList)
                             {
-                                if (grid == grid1)
+                                if (Equals(grid, grid1))
                                 {
-                                    _mainThread.Send(state => { _selectedPiece = new Queen(_playerTurn, grid); },null);
+                                    PieceList.Remove(_selectedPiece);
+                                    _mainThread.Send(state =>
+                                    {
+                                        _selectedPiece = new Queen(_playerTurn, grid);
+                                        PieceList.Add(_selectedPiece);
+                                    }, null);
                                 }
                             }
                         }
